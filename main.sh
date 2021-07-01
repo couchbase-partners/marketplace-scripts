@@ -221,11 +221,22 @@ if [[ "$SYNC_GATEWAY" != "1" ]]; then
   __log_info "Services to be intialized: $SERVICES"
   __log_info "Memory Quotas - Data: $DATA_QUOTA, Index: $INDEX_QUOTA, Analytics: $ANALYTICS_QUOTA, Eventing: $EVENTING_QUOTA, Search: $SEARCH_QUOTA"
 fi
+# if -s is passed, that means this script is being run at every startup, so we have to check to see
+# if the work has already been completed.  If it has, we just want to exit gracefully
 if [[ "$STARTUP" == "1" ]]; then
   __log_info "Checking for Couchbase Server Install"
   if [ -d "/opt/couchbase" ]; then
-    __log_info "Couchbase is already installed.  Exiting"
-    exit;
+    # If we're not cluster only.. just exit
+    if [[ "$CLUSTER_ONLY" == "0" ]]; then
+      __log_info "Couchbase is already installed and part of a membership.  Exiting"
+      exit;
+    fi
+    # try to get the cluster membership and if it is active, we don't need to do anything, even if we are cluster only
+    CLUSTER_MEMBERSHIP=$(wget --http-user="$CB_USERNAME" --http-password="$CB_PASSWORD" -O - http://127.0.0.1:8091/pools/default -q | jq -r '') || CLUSTER_MEMBERSHIP="unknown pool"
+    if [[ "$CLUSTER_MEMBERSHIP" != "unknown pool" ]]; then
+      __log_info "Couchbase is already installed and part of a membership.  Exiting"
+      exit;
+    fi
   fi
 fi
 

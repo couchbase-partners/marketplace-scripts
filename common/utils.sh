@@ -130,7 +130,7 @@ function __convertToMiB() {
     local value
     value=$(__toUpper "${1}")
     local default=0
-    if [ -n "$2" ]; then
+    if [ $# -eq 2 ]; then
         default=$(__convertToMiB "$2")
     fi
     local gib=0

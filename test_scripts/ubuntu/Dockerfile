@@ -1,4 +1,4 @@
-FROM ubuntu:20.04
+FROM ubuntu:18.04
 RUN apt-get update && apt-get install -y python procps && apt-get clean
 COPY . /app
 COPY ./test_scripts/docker/systemctl.py /usr/bin/systemctl

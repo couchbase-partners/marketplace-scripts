@@ -144,7 +144,7 @@ case $key in
       shift
     ;;
     -sv|--services)
-      if [ -n "$2" ] && [ "${2:0:1}" != "-" ] && __allExists "$2" "${DEFAULT_SERVICES[@]}" ; then
+      if [ -n "$2" ] && [ "${2:0:1}" != "-" ] && __allExists "$2" "${DEFAULT_7_SERVICES[@]}" ; then
         SERVICES=$2
         shift 2
       else
@@ -210,6 +210,13 @@ done
 if [[ "$HELP" == 1 ]]; then
     print_help
     exit 0
+fi
+
+# we need to determine the default services here.  So if they were not passed in, we figure it out based on the version
+if [[ "$SERVICES" == "" ]]; then
+  __log_debug "Retrieving default services."
+  SERVICES=$(__get_default_services "$VERSION")
+  __log_debug "Default Services retrieved $SERVICES"
 fi
 
 

@@ -2,7 +2,7 @@
 
 # Main Constants
 export HELP=0
-export VERSION="6.6.1"
+export VERSION="7.0.1"
 export OS="UBUNTU"
 export readonly AVAILABLE_OS_VALUES=("UBUNTU" "RHEL" "CENTOS" "DEBIAN" "AMAZON")
 export ENV="OTHER"
@@ -22,9 +22,7 @@ export NO_CLUSTER=0
 export CLUSTER_ONLY=0
 # Internal variable for determining whether to perform clustering or not
 export DO_CLUSTER=0
-export readonly DEFAULT_SERVICES=("data" "index" "analytics" "eventing" "fts" "query")
-export SERVICES="${DEFAULT_SERVICES[*]}"
-export SERVICES="${SERVICES// /,}"
+export SERVICES=""
 export DATA_QUOTA=0
 DATA_QUOTA=$(__getTotalRam)
 export DATA_QUOTA=$((DATA_QUOTA / 2)) #50% of available as default

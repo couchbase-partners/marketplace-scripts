@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-
+export readonly DEFAULT_SERVICES=("data" "index" "analytics" "eventing" "fts" "query")
+export readonly DEFAULT_7_SERVICES=("data" "index" "analytics" "eventing" "fts" "query" "backup")
 #  Generates a 13 character random string
 function __generate_random_string() {
     NEW_UUID=$(LC_ALL=C tr -dc A-Za-z0-9 </dev/urandom | head -c 13 ; echo '')
@@ -11,6 +12,20 @@ error_exit() {
     shift 1
     __log_error "non zero return code from line: $line - $*"
     exit 1
+}
+
+function __get_default_services() {
+    local version=$1
+    local isSeven
+    isSeven=$(__compareVersions "$version" "7.0.0")
+    local services="${DEFAULT_SERVICES[*]}"
+    local services="${services// /,}"
+    if [[ $isSeven -ge 0 ]]; then 
+        services="${DEFAULT_7_SERVICES[*]}"
+        services="${services// /,}"
+    fi
+    echo "$services"
+    return
 }
 
 # Checks to see if a value is contained by an array

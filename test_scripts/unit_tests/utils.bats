@@ -206,3 +206,17 @@ setup() {
     assert_failure
 }
 
+@test "__get_default_services returns correct services for CBS 7.0.0" {
+    run __get_default_services "7.0.0"
+    assert_output "data,index,analytics,eventing,fts,query,backup"
+}
+
+@test "__get_default_services returns correct services for CBS 6.6.3" {
+    run __get_default_services "6.6.3"
+    assert_output "data,index,analytics,eventing,fts,query"
+}
+
+@test "__get_default_services returns correct services for CBS 7.0.2" {
+    run __get_default_services "7.0.2"
+    assert_output "data,index,analytics,eventing,fts,query,backup"
+}

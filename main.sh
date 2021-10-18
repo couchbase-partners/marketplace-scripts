@@ -362,8 +362,11 @@ then
   while [[ $output != "Server $LOCAL_IP:8091 added" && $output != *"Node is already part of cluster."* ]]
   do
     __log_debug "In server add loop"
+    # See MB-38001 - Must pass http:// and port 8091 to get it to not try to use tls in 7.0.0+
+    # Since we have to be backward compatible, we're going to fall back to http only for now and
+    # remove in the future
     if output=$(./couchbase-cli server-add \
-      --cluster="$CLUSTER_HOST" \
+      --cluster="http://$CLUSTER_HOST:8091" \
       --username="$CB_USERNAME" \
       --password="$CB_PASSWORD" \
       --server-add="$LOCAL_IP" \

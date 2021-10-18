@@ -369,7 +369,7 @@ then
       --cluster="http://$CLUSTER_HOST:8091" \
       --username="$CB_USERNAME" \
       --password="$CB_PASSWORD" \
-      --server-add="$LOCAL_IP" \
+      --server-add="http://$LOCAL_IP:8091" \
       --server-add-username="$CB_USERNAME" \
       --server-add-password="$CB_PASSWORD" \
       --services="$SERVICES" 2>&1); then

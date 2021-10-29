@@ -278,11 +278,14 @@ if [[ "$SYNC_GATEWAY" == 1 ]] || [[ "$NO_CLUSTER" == 1 ]]; then
 fi
 
 __log_debug "The username is ${CB_USERNAME}"
-__log_debug "The password is ${CB_PASSWORD}"
+
+if [[ "$CB_PASSWORD" == "$DEFAULT_PASSWORD" ]]; then
+  __log_debug "The password is ${CB_PASSWORD}"
+fi
 
 #Slap a warning if the user did not specify a username/passsword
-if [[ "$CB_USERNAME" == "$DEFAULT_USERNAME" ]] && [[ "$CB_PASSWORD" == "$DEFAULT_PASSWORD" ]]; then
-    __log_warning "Default user name and password detected.  You should immediately log into the web console and change the password on the couchbase user!"
+if [[ "$CB_USERNAME" == "$DEFAULT_USERNAME" ]] || [[ "$CB_PASSWORD" == "$DEFAULT_PASSWORD" ]]; then
+    __log_warning "Default user name or password detected.  You should immediately log into the web console and change the password on the couchbase user!"
 fi
 
 

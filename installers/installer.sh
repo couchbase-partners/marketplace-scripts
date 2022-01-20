@@ -209,43 +209,6 @@ function __formatDataDisk ()
         mkdir "$MOUNTPOINT/logs"
         ln -s "$MOUNTPOINT/logs" /opt/couchbase/var/lib/couchbase/logs
     fi
-
-    if [[ "$env" == "AZURE" && "$sync_gateway" -eq "0" ]]; then
-        # This script formats and mounts the drive on lun0 as /datadisk
-        __log_debug "AZURE: Formatting data disk"
-
-        DISK="/dev/disk/azure/scsi1/lun0"
-        PARTITION="/dev/disk/azure/scsi1/lun0-part1"
-        MOUNTPOINT="/datadisk"
-
-        __log_debug "Partitioning the disk."
-        echo "n
-        p
-        1
-
-
-        t
-        83
-        w"| fdisk ${DISK}
-
-        __log_debug "Waiting for the symbolic link to be created..."
-        udevadm settle --exit-if-exists=$PARTITION
-
-        __log_debug "Creating the filesystem."
-        mkfs -j -t ext4 ${PARTITION}
-
-        __log_debug "Updating fstab"
-        LINE="${PARTITION}\t${MOUNTPOINT}\text4\tnoatime,nodiratime,nodev,noexec,nosuid\t1\t2"
-        echo -e ${LINE} >> /etc/fstab
-
-        __log_debug "Mounting the disk"
-        mkdir -p $MOUNTPOINT
-        mount -a
-
-        __log_debug "Changing permissions"
-        chown couchbase $MOUNTPOINT
-        chgrp couchbase $MOUNTPOINT
-    fi
 }
 
 function __setSwappiness()

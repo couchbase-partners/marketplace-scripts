@@ -320,19 +320,14 @@ function __install_syncgateway() {
     mkdir -p /home/sync_gateway/
     chown sync_gateway:sync_gateway /home/sync_gateway
     if [[ "$os" == "CENTOS" ]]; then
-        version=$(__findClosestVersion "$1" "${CENTOS_SUPPORTED_SYNC_GATEWAY_VERSIONS[@]}")
         __install_syncgateway_centos "$version" "$tmp"
     elif [[ "$os" == "DEBIAN" ]]; then
-        version=$(__findClosestVersion "$1" "${DEBIAN_SUPPORTED_SYNC_GATEWAY_VERSIONS[@]}")
         __install_syncgateway_debian "$version" "$tmp"
     elif [[ "$os" == "RHEL" ]]; then
-        version=$(__findClosestVersion "$1" "${RHEL_SUPPORTED_SYNC_GATEWAY_VERSIONS[@]}")
         __install_syncgateway_rhel "$version" "$tmp"
     elif [[ "$os" == "AMAZON" ]]; then
-        version=$(__findClosestVersion "$1" "${AMAZON_LINUX_SUPPORTED_SYNC_GATEWAY_VERSIONS[@]}")
         __install_syncgateway_amazon "$version" "$tmp"        
     else
-        version=$(__findClosestVersion "$1" "${UBUNTU_SUPPORTED_SYNC_GATEWAY_VERSIONS[@]}")
         __install_syncgateway_ubuntu "$version" "$tmp"
     fi
 
@@ -447,46 +442,14 @@ function __install_couchbase() {
     fi
     __log_debug "Installing Couchbase on $os"
     if [[ "$os" == "CENTOS" ]]; then
-        version=$(__findClosestVersion "$1" "${CENTOS_SUPPORTED_VERSIONS[@]}")
         __install_couchbase_centos "$version" "$tmp"
     elif [[ "$os" == "DEBIAN" ]]; then
-        if [[ "$OS_VERSION" == "8" ]]; then
-            version=$(__findClosestVersion "$1" "${DEBIAN_8_SUPPORTED_VERSIONS[@]}")
-        fi
-        if [[ "$OS_VERSION" == "9" ]]; then
-            version=$(__findClosestVersion "$1" "${DEBIAN_9_SUPPORTED_VERSIONS[@]}")
-        fi
-        if [[ "$OS_VERSION" == "10" ]]; then
-            version=$(__findClosestVersion "$1" "${DEBIAN_10_SUPPORTED_VERSIONS[@]}")
-        fi
         __install_couchbase_debian "$version" "$tmp"
     elif [[ "$os" == "RHEL" ]]; then
-        if [[ "$OS_VERSION" == "8" ]]; then
-            version=$(__findClosestVersion "$1" "${RHEL_8_SUPPORTED_VERSIONS[@]}")
-        fi
-        if [[ "$OS_VERSION" == "7" ]]; then
-            version=$(__findClosestVersion "$1" "${RHEL_7_SUPPORTED_VERSIONS[@]}")
-        fi
-        if [[ "$OS_VERSION" == "6" ]]; then
-            version=$(__findClosestVersion "$1" "${RHEL_6_SUPPORTED_VERSIONS[@]}")
-        fi
         __install_couchbase_rhel "$version" "$tmp"
     elif [[ "$os" == "AMAZON" ]]; then
-        version=$(__findClosestVersion "$1" "${AMAZON_LINUX_SUPPORTED_VERSIONS[@]}")
         __install_couchbase_amazon "$version" "$tmp"
     else
-        if [[ "$OS_VERSION" == "14.04" ]]; then
-            version=$(__findClosestVersion "$1" "${UBUNTU_14_SUPPORTED_VERSIONS[@]}")
-        fi
-        if [[ "$OS_VERSION" == "16.04" ]]; then
-            version=$(__findClosestVersion "$1" "${UBUNTU_16_SUPPORTED_VERSIONS[@]}")
-        fi
-        if [[ "$OS_VERSION" == "18.04" ]]; then
-            version=$(__findClosestVersion "$1" "${UBUNTU_18_SUPPORTED_VERSIONS[@]}")
-        fi
-        if [[ "$OS_VERSION" == "20.04" ]]; then
-            version=$(__findClosestVersion "$1" "${UBUNTU_20_SUPPORTED_VERSIONS[@]}")
-        fi
         __install_couchbase_ubuntu "$version" "$tmp"
     fi
 

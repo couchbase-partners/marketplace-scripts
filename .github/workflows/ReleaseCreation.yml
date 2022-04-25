@@ -29,7 +29,7 @@ jobs:
           go-version: '^1.15.6'
       # Runs a single command using the runners shell
       - name: Install Bash Bundler
-        run: export GO111MODULE=on && go get github.com/malscent/bash_bundler
+        run: export GO111MODULE=on && go install github.com/malscent/bash_bundler@latest
       - name: Create Build Directory
         run: mkdir ${GITHUB_WORKSPACE}/build
       - name: Create Output file

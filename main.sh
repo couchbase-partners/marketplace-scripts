@@ -372,9 +372,11 @@ then
     greaterThan71=$(__compareVersions 7.1.0 "$VERSION")
     cluster="http://$CLUSTER_HOST:8091"
     serverAdd="http://$LOCAL_IP:8091"
+    sslVerify=""
     if [[ "$greaterThan71" -le "0" ]]; then
       cluster="https://$CLUSTER_HOST"
       serverAdd="https://$LOCAL_IP"
+      sslVerify="--no-ssl-verify"
     fi
     if output=$(./couchbase-cli server-add \
       --cluster="$cluster" \
@@ -383,7 +385,7 @@ then
       --server-add="$serverAdd" \
       --server-add-username="$CB_USERNAME" \
       --server-add-password="$CB_PASSWORD" \
-      --services="$SERVICES" 2>&1); then
+      --services="$SERVICES" $sslVerify 2>&1); then
       output="Server $LOCAL_IP:8091 added"
     else
       __log_error "Error during Server Add"

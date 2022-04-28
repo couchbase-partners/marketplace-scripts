@@ -368,11 +368,19 @@ then
     # See MB-38001 - Must pass http:// and port 8091 to get it to not try to use tls in 7.0.0+
     # Since we have to be backward compatible, we're going to fall back to http only for now and
     # remove in the future
+    # The future has come.  We're going to check version and if 7.1.0+ we're going to use https
+    greaterThan71=$(__compareVersions 7.1.0 "$VERSION")
+    cluster="http://$CLUSTER_HOST:8091"
+    serverAdd="http://$LOCAL_IP:8091"
+    if [[ "$greaterThan71" -le "0" ]]; then
+      cluster="https://$CLUSTER_HOST"
+      serverAdd="https://$LOCAL_IP"
+    fi
     if output=$(./couchbase-cli server-add \
-      --cluster="http://$CLUSTER_HOST:8091" \
+      --cluster="$cluster" \
       --username="$CB_USERNAME" \
       --password="$CB_PASSWORD" \
-      --server-add="http://$LOCAL_IP:8091" \
+      --server-add="$serverAdd" \
       --server-add-username="$CB_USERNAME" \
       --server-add-password="$CB_PASSWORD" \
       --services="$SERVICES" 2>&1); then

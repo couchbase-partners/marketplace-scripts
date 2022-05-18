@@ -43,6 +43,7 @@ key="$1"
 
 case $key in
     -v|--version)
+      # Version of couchbase server/sync gateway to install
       if [ -n "$2" ] && [ "${2:0:1}" != "-" ]; then
         VERSION=$2
         shift 2
@@ -52,6 +53,7 @@ case $key in
       fi; #past argment
     ;;
     -os|--operating-system)
+      # Operating system (UBUNTU, RHEL, AMAZON). See AVAILABLE_OS_VALUES for full list
       if [ -n "$2" ] && [ "${2:0:1}" != "-" ]; then
         useful=$(__elementIn "${2}" "${AVAILABLE_OS_VALUES[@]}")
         if [ "$useful" == 1 ]; then
@@ -66,6 +68,7 @@ case $key in
       fi; #past argment
     ;;
     -ch|--cluster-host)
+      # Rally point url.  This is the hostname of the server determined to be used to create the cluster
       if [ -n "$2" ] && [ "${2:0:1}" != "-" ]; then
         CLUSTER_HOST=$2
         shift 2
@@ -75,6 +78,7 @@ case $key in
       fi; #past argment
     ;;
     -u|--user)
+      # Username for creating/joining cluster, defaults to "couchbase"
       if [ -n "$2" ] && [ "${2:0:1}" != "-" ]; then
         CB_USERNAME=$2
         shift 2
@@ -84,6 +88,7 @@ case $key in
       fi; #past argment
     ;;
     -p|--password)
+     # Password for creating/joining cluster.  Will default to DEFAULT_PASSWORD which is a randomly generating string
       if [ -n "$2" ] && [ "${2:0:1}" != "-" ]; then
         CB_PASSWORD=$2
         shift 2
@@ -93,26 +98,32 @@ case $key in
       fi; #past argment
     ;;
     -g|--sync-gateway)
+      # Flag to toggle gateway install
       SYNC_GATEWAY=1
       shift
     ;;
     -d|--debug)
+      # Sets debug mode for additional log levels
     export DEBUG=1
     shift # past argument
     ;;
     -r|--run-continuously)
+      # Runs in perpetuity, useful for disposable containers
     DAEMON=1
     shift
     ;;    
     -s|--startup)
+      # Indicates that this script will be run at every boot and should check for installation before continuing
     STARTUP=1
     shift
     ;;
     -c|--no-color)
+      # Turns off ANSI color for terminals that do not support it
     export NO_COLOR=1
     shift
     ;;
     -e|--environment)
+      # Environment that this script is being run in (Azure, AWS, GCP, Docker, etc)
       if [ -n "$2" ] && [ "${2:0:1}" != "-" ]; then
         useful=$(__elementIn "${2}" "${AVAILABLE_ENV_VALUES[@]}")
         if [ "$useful" == 1 ]; then
@@ -127,6 +138,7 @@ case $key in
       fi;
     ;;
     -w|--wait-nodes)
+      # Indicate that this script should wait until it sees N nodes in the cluster before completing
       if [ -n "$2" ] && [ "${2:0:1}" != "-" ]; then
         WAIT=$2
         shift 2
@@ -136,14 +148,17 @@ case $key in
       fi; #past argment
     ;;
     -n|--no-cluster)
+      # Don't cluster the couchbase server nodes, only install
       NO_CLUSTER=1
       shift
     ;;
     -co|--cluster-only)
+      # Don't install couchbase server, only perform the clustering
       CLUSTER_ONLY=1
       shift
     ;;
     -sv|--services)
+      # Comma delimited list of services to run on this node
       if [ -n "$2" ] && [ "${2:0:1}" != "-" ] && __allExists "$2" "${DEFAULT_7_SERVICES[@]}" ; then
         SERVICES=$2
         shift 2
@@ -152,7 +167,18 @@ case $key in
         exit 1
       fi;
     ;;
+    -aa|--alternate-address)
+      # Adds alternate address to the couchbase node
+      if [ -n "$2" ] && [ "${2:0:1}" != "-" ]; then
+        ALTERNATE_ADDRESS=$2
+        shift 2
+      else
+        __log_error "Error: Argument for $1 is missing, or incorrect" >&2
+        exit 1
+      fi;
+    ;;
     -sm|--search-memory)
+      # indicates the amount of memory to allocate to the fts service
       if [ -n "$2" ] && [ "${2:0:1}" != "-" ]; then
       SEARCH_QUOTA=$(__convertToMiB "$2" "$SEARCH_QUOTA")
         shift 2
@@ -162,6 +188,7 @@ case $key in
       fi;
     ;;
     -am|--analytics-memory)
+      # indicates the amount of memory to allocate to the analytics service
       if [ -n "$2" ] && [ "${2:0:1}" != "-" ]; then
         ANALYTICS_QUOTA=$(__convertToMiB "$2" "$ANALYTICS_QUOTA")
         shift 2
@@ -171,6 +198,7 @@ case $key in
       fi;
     ;;
     -em|--eventing-memory)
+      # indicates the amount of memory to allocate to the eventing service
       if [ -n "$2" ] && [ "${2:0:1}" != "-" ]; then
         EVENTING_QUOTA=$(__convertToMiB "$2" "$EVENTING_QUOTA")
         shift 2
@@ -180,6 +208,7 @@ case $key in
       fi;
     ;;
     -im|--index-memory)
+      # indicates the amount of memory to allocate to the index service
       if [ -n "$2" ] && [ "${2:0:1}" != "-" ]; then
         INDEX_QUOTA=$(__convertToMiB "$2" "$INDEX_QUOTA")
         shift 2
@@ -189,6 +218,7 @@ case $key in
       fi;
     ;;
     -dm|--data-memory)
+      # indicates the amount of memory to allocate to the data service
       if [ -n "$2" ] && [ "${2:0:1}" != "-" ]; then
         DATA_QUOTA=$(__convertToMiB "$2" "$DATA_QUOTA")
         shift 2
@@ -198,6 +228,7 @@ case $key in
       fi;
     ;;
     -h|--help)
+    # prints help
     HELP=1
     shift # past argument
     ;;
@@ -342,6 +373,19 @@ if [[ "$SYNC_GATEWAY" == 0 ]]; then
     --password="$CB_PASSWORD") || __log_error "Error during Node Initialization"
   __log_debug "node-init result: \'$resval\'"
 
+  # if we have an alternate address, we should add it here
+  if [[ -n "$ALTERNATE_ADDRESS" ]]; then
+    __log_debug "Adding Alternate address."
+    resval=$(./couchbase-cli setting-alternate-address \
+              --cluster="${LOCAL_IP}" \
+              --username="$CB_USERNAME" \
+              --password="$CB_PASSWORD" \
+              --set \
+              --hostname "$ALTERNATE_ADDRESS" \
+              --node "${LOCAL_IP}" ) || __log_error "Error during addition of an alternate address: \'$ALTERNATE_ADDRESS\'"
+    __log_debug "Added address: $ALTERNATE_ADDRESS"
+    __log_debug "setting-alternate-address result: \'$resval\'"
+  fi
 fi
 
 if [[ $DO_CLUSTER == 1 ]]

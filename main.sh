@@ -177,6 +177,16 @@ case $key in
         exit 1
       fi;
     ;;
+    -fd|--format-disk)
+      # Specifies disk to use and format for Couchbase, if left blank, no disk will be formatted
+      if [ -n "$2" ] && [ "${2:0:1}" != "-" ]; then
+        DISK=$2
+        shift 2
+      else
+        __log_error "Error: Argument for $1 is missing, or incorrect" >&2
+        exit 1
+      fi;
+    ;;
     -sm|--search-memory)
       # indicates the amount of memory to allocate to the fts service
       if [ -n "$2" ] && [ "${2:0:1}" != "-" ]; then
@@ -281,7 +291,6 @@ fi
 #installing prerequisites from installer
 __install_prerequisites "$OS" "$ENV" "$SYNC_GATEWAY"
 
-
 PUBLIC_HOSTNAME=""
 #Getting information to determine whether this is the cluster host or not.
 if [[ "$OS" == "AMAZON" ]]; then
@@ -334,7 +343,7 @@ echo "
 " >> /etc/hosts
 
 __log_debug "Performing Post Installation Configuration"
-__configure_environment "$ENV" "$OS" "$SYNC_GATEWAY"
+__configure_environment "$ENV" "$OS" "$SYNC_GATEWAY" "$DISK"
 __log_debug "Completed Post Installation Configuration"
 
 if [[ "$SYNC_GATEWAY" == 0 ]]; then

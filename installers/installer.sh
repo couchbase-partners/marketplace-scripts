@@ -176,13 +176,7 @@ function __adjustTCPKeepalive ()
 
 function __get_datadisk()
 {
-    local env=$1
-    # AWS is /mnt/datadisk whereas azure and gcp are /datadisk
-    if [[ "$env" == "AWS" ]]; then
-        echo "/mnt/datadisk"
-    else 
-        echo "/datadisk"
-    fi
+    echo "/datadisk"
 }
 
 function __formatDataDisk ()
@@ -190,23 +184,24 @@ function __formatDataDisk ()
     local os=$1
     local env=$2
     local sync_gateway=$3
-    if [[ "$env" == "AWS" && "$sync_gateway" -eq "0" ]]; then
-        __log_debug "AWS: Formatting data disk"
-        DEVICE=/dev/sdk
-        MOUNTPOINT=/mnt/datadisk
-        mkfs -t ext4 ${DEVICE}
+    local disk=$4
+    MOUNTPOINT="/datadisk"
+    if [[ "$sync_gateway" -eq "0" ]]; then
+        __log_debug "Formatting data disk"
+        DEVICE="$disk"
+        mkfs.ext4 -m 0 -E lazy_itable_init=0,lazy_journal_init=0,discard "${DEVICE}"
         LINE="${DEVICE}\t${MOUNTPOINT}\text4\tdefaults,nofail\t0\t2"
-        echo -e ${LINE} >> /etc/fstab
+        echo -e "${LINE}" >> /etc/fstab
         cat /etc/fstab
         __log_debug "Creating mountpoint: $MOUNTPOINT"
-        mkdir $MOUNTPOINT
-        mount -a
+        mkdir -p $MOUNTPOINT
+        mount -o discard,defaults "$DEVICE" "$MOUNTPOINT"
         __log_debug "Changing ownership of $MOUNTPOINT"
         chown couchbase $MOUNTPOINT -v
         __log_debug "Changing group of $MOUNTPOINT"
         chgrp couchbase $MOUNTPOINT -v
         __log_debug "Symbolic link logs directory to data disk"
-        mkdir "$MOUNTPOINT/logs"
+        mkdir -p "$MOUNTPOINT/logs"
         ln -s "$MOUNTPOINT/logs" /opt/couchbase/var/lib/couchbase/logs
     fi
 }
@@ -256,11 +251,15 @@ function __configure_environment() {
     local env=$1
     local os=$2
     local sync_gateway=$3
+    local disk=$4
     __log_debug "Setting up for environment: ${env}"
     __turnOffTransparentHugepages "$os" "$env" "$sync_gateway"
     __setSwappiness "$os" "$env" "$sync_gateway"
     __adjustTCPKeepalive "$os" "$env" "$sync_gateway"
-    __formatDataDisk "$os" "$env" "$sync_gateway"
+    if [[ -n "$disk" ]]; then
+        __log_debug "Formatting disk: $disk"
+        __formatDataDisk "$os" "$env" "$sync_gateway" "$disk"
+    fi
     if [[ "$os" == "CENTOS" ]]; then
         __centos_environment "$env" "$sync_gateway"
     elif [[ "$os" == "DEBIAN" ]]; then

@@ -32,6 +32,8 @@ export INDEX_QUOTA=$((15 * INDEX_QUOTA / 100 )) #15% of available as default
 export SEARCH_QUOTA=256
 export ANALYTICS_QUOTA=1024
 export EVENTING_QUOTA=256
+export DISK=""
+export ALTERNATE_ADDRESS=""
 
 #Installer Constants
 export readonly CENTOS_OS_SUPPORTED_VERSIONS=("8" "7")

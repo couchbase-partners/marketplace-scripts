@@ -186,24 +186,33 @@ function __formatDataDisk ()
     local sync_gateway=$3
     local disk=$4
     MOUNTPOINT="/datadisk"
-    if [[ "$sync_gateway" -eq "0" ]]; then
+    if [[ "$sync_gateway" -ne "0" ]]; then
+        return
+    fi
+
+    # first, make mount point 
+    __log_debug "Creating mountpoint: $MOUNTPOINT"
+    mkdir -p $MOUNTPOINT
+
+    # if we have a disk, format and mount
+    if [[ -n "$disk" ]] &&  sudo fdisk -l | grep -wq "$disk"; then
         __log_debug "Formatting data disk"
         DEVICE="$disk"
         mkfs.ext4 -m 0 -E lazy_itable_init=0,lazy_journal_init=0,discard "${DEVICE}"
         LINE="${DEVICE}\t${MOUNTPOINT}\text4\tdefaults,nofail\t0\t2"
         echo -e "${LINE}" >> /etc/fstab
         cat /etc/fstab
-        __log_debug "Creating mountpoint: $MOUNTPOINT"
-        mkdir -p $MOUNTPOINT
         mount -o discard,defaults "$DEVICE" "$MOUNTPOINT"
-        __log_debug "Changing ownership of $MOUNTPOINT"
-        chown couchbase $MOUNTPOINT -v
-        __log_debug "Changing group of $MOUNTPOINT"
-        chgrp couchbase $MOUNTPOINT -v
-        __log_debug "Symbolic link logs directory to data disk"
-        mkdir -p "$MOUNTPOINT/logs"
-        ln -s "$MOUNTPOINT/logs" /opt/couchbase/var/lib/couchbase/logs
     fi
+    # set ownership of the mount point
+    __log_debug "Changing ownership of $MOUNTPOINT"
+    chown couchbase $MOUNTPOINT -v
+    __log_debug "Changing group of $MOUNTPOINT"
+    chgrp couchbase $MOUNTPOINT -v
+    __log_debug "Symbolic link logs directory to data disk"
+    mkdir -p "$MOUNTPOINT/logs"
+    ln -s "$MOUNTPOINT/logs" /opt/couchbase/var/lib/couchbase/logs
+
 }
 
 function __setSwappiness()
@@ -256,10 +265,7 @@ function __configure_environment() {
     __turnOffTransparentHugepages "$os" "$env" "$sync_gateway"
     __setSwappiness "$os" "$env" "$sync_gateway"
     __adjustTCPKeepalive "$os" "$env" "$sync_gateway"
-    if [[ -n "$disk" ]]; then
-        __log_debug "Formatting disk: $disk"
-        __formatDataDisk "$os" "$env" "$sync_gateway" "$disk"
-    fi
+    __formatDataDisk "$os" "$env" "$sync_gateway" "$disk"
     if [[ "$os" == "CENTOS" ]]; then
         __centos_environment "$env" "$sync_gateway"
     elif [[ "$os" == "DEBIAN" ]]; then

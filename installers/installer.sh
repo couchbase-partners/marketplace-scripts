@@ -195,7 +195,7 @@ function __formatDataDisk ()
     mkdir -p $MOUNTPOINT
 
     # if we have a disk, format and mount
-    if [[ -n "$disk" ]] &&  sudo fdisk -l | grep -wq "$disk"; then
+    if [[ -n "$disk" ]] &&  [[ -b "$disk" ]]; then
         __log_debug "Formatting data disk"
         DEVICE="$disk"
         mkfs.ext4 -m 0 -E lazy_itable_init=0,lazy_journal_init=0,discard "${DEVICE}"

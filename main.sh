@@ -299,6 +299,7 @@ PUBLIC_HOST_IP=$(dig +short "$CLUSTER_HOST")
 
 __log_debug "Hostname:  ${HOST}"
 __log_debug "Local IP: ${LOCAL_IP}"
+__log_debug "Public_Host_IP: ${PUBLIC_HOST_IP}"
 
 # Check if host is cluster host, or local ip, or if the clusterhost contains the host for FQDN on GCP
 

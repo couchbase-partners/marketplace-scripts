@@ -49,7 +49,7 @@ jobs:
       - name: Docker containers running?
         run: docker ps
       - name: Test
-        run: while ! curl http://localhost:8091/ui/index.html; do sleep 10; done;
+        run: while ! curl http://localhost:8081/ui/index.html; do sleep 10; done;
         timeout-minutes: 15
       - name: Teardown
         run: docker-compose -f ./compose-files/UbuntuClusterCompose.yml down

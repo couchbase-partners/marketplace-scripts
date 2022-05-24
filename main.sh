@@ -295,15 +295,16 @@ __install_prerequisites "$OS" "$ENV" "$SYNC_GATEWAY"
 LOCAL_IP=$(ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1')
 HOST=$(hostname) || hostnamectl
 # Do a reverse DNS lookup on the cluster host and see if it is this local ip
-PUBLIC_HOST_IP=$(dig +short "$CLUSTER_HOST")
-
+PUBLIC_HOST_DNS=$(dig +short "$CLUSTER_HOST")
+PUBLIC_IP=$(curl ifconfig.me)
 __log_debug "Hostname:  ${HOST}"
 __log_debug "Local IP: ${LOCAL_IP}"
-__log_debug "Public_Host_IP: ${PUBLIC_HOST_IP}"
+__log_debug "ReverseDNS: ${PUBLIC_HOST_DNS}"
+__log_debug "Public IP: ${PUBLIC_IP}"
 
 # Check if host is cluster host, or local ip, or if the clusterhost contains the host for FQDN on GCP
 
-if [[ "$CLUSTER_HOST" == "$HOST" ]] || [[ "$CLUSTER_HOST" == "$LOCAL_IP" ]] || [[ "$CLUSTER_HOST" == *"$HOST"* ]] || [[ "$PUBLIC_HOST_IP" == "$LOCAL_IP" ]]; then
+if [[ "$CLUSTER_HOST" == "$HOST" ]] || [[ "$CLUSTER_HOST" == "$LOCAL_IP" ]] || [[ "$CLUSTER_HOST" == *"$HOST"* ]] || [[ "$PUBLIC_HOST_DNS" == "$LOCAL_IP" ]] || [[ "$PUBLIC_IP" == "$PUBLIC_HOST_DNS" ]]; then
     __log_info "${CLUSTER_HOST} is host and is this machine"
     DO_CLUSTER=1
 fi

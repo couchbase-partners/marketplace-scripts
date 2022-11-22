@@ -382,8 +382,10 @@ function __install_couchbase_amazon() {
     # examples from packages.couchbase.com
     #https://packages.couchbase.com/releases/7.0.0-beta/couchbase-server-enterprise-7.0.0-beta-amzn2.x86_64.rpm
     #https://packages.couchbase.com/releases/6.6.2/couchbase-server-enterprise-6.6.2-amzn2.x86_64.rpm
+    #https://packages.couchbase.com/releases/6.6.2/couchbase-server-enterprise-7.1.3-amzn2.aarch64.rpm
+    ARCH=$(uname -m)
     wget -O "${tmp}/couchbase-server-enterprise-${version}-amzn2.x86_64.rpm" \
-    "https://packages.couchbase.com/releases/${version}/couchbase-server-enterprise-${version}-amzn2.x86_64.rpm" -q
+    "https://packages.couchbase.com/releases/${version}/couchbase-server-enterprise-${version}-amzn2.${ARCH}.rpm" -q
     __log_debug "Beginning Installation"
     yum install "${tmp}/couchbase-server-enterprise-${version}-amzn2.x86_64.rpm" -y -q
 }

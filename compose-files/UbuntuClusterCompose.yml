@@ -12,7 +12,7 @@ services:
     networks:
       - cb-net-ubuntu
     container_name: ubuntu-clusterhost
-    command: --version 7.0.2 -u couchbase -p foo123! -ch clusterhost -d -os UBUNTU -r -w 3
+    command: --version 7.2.4 -u couchbase -p foo123! -ch clusterhost -d -os UBUNTU -r -w 3
     privileged: true
   nodeone:
     image: couchbase/ubuntu
@@ -25,7 +25,7 @@ services:
     ports: 
       - "8081:8091"
     container_name: ubuntu-node-one
-    command: --version 7.0.2 -u couchbase -p foo123! -ch ubuntu-clusterhost -d -os UBUNTU -r
+    command: --version 7.2.4 -u couchbase -p foo123! -ch ubuntu-clusterhost -d -os UBUNTU -r
     privileged: true
   nodetwo:
     image: couchbase/ubuntu
@@ -38,7 +38,7 @@ services:
     ports: 
       - "8082:8091"
     container_name: ubuntu-node-two
-    command: --version 7.0.2 -u couchbase -p foo123! -ch ubuntu-clusterhost -d -os UBUNTU -r
+    command: --version 7.2.4 -u couchbase -p foo123! -ch ubuntu-clusterhost -d -os UBUNTU -r
     privileged: true
   nocluster:
     image: couchbase/ubuntu
@@ -51,7 +51,7 @@ services:
     ports: 
       - "8083:8091"
     container_name: ubuntu-no-cluster
-    command: --version 7.0.2 -u couchbase -p foo123! -ch ubuntu-clusterhost -d -os UBUNTU -r --no-cluster --services data,index,query,analytics,eventing,fts -dm 256 -im 256 -qm 256 -am 1024 -em 256 -sm 256
+    command: --version 7.2.4 -u couchbase -p foo123! -ch ubuntu-clusterhost -d -os UBUNTU -r --no-cluster --services data,index,query,analytics,eventing,fts -dm 256 -im 256 -qm 256 -am 1024 -em 256 -sm 256
     privileged: true    
   gateway:
     image: couchbase/ubuntu

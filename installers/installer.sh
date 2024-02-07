@@ -365,14 +365,25 @@ function __install_couchbase_centos() {
     local tmp=$2
     __log_info "Installing Couchbase Server v${version}..."
     __log_debug "Downloading installer to: ${tmp}"
+    local ARCH
+    ARCH=$(uname -m)
+    local file_path="${tmp}/couchbase-server-enterprise-${version}-centos${OS_VERSION}.x86_64.rpm"
     # example urls pulled from the couchbase.com website
     #https://packages.couchbase.com/releases/7.0.0-beta/couchbase-server-enterprise-7.0.0-beta-centos8.x86_64.rpm
     #https://packages.couchbase.com/releases/6.6.2/couchbase-server-enterprise-6.6.2-centos8.x86_64.rpm
     #https://packages.couchbase.com/releases/6.6.2/couchbase-server-enterprise-6.6.2-centos7.x86_64.rpm
-    wget -O "${tmp}/couchbase-server-enterprise-${version}-centos${OS_VERSION}.x86_64.rpm" \
-    "https://packages.couchbase.com/releases/${version}/couchbase-server-enterprise-${version}-centos${OS_VERSION}.x86_64.rpm" -q
+    local download_url="https://packages.couchbase.com/releases/${version}/couchbase-server-enterprise-${version}-centos${OS_VERSION}.x86_64.rpm"
+    # New for 7.2.2+
+    #https://packages.couchbase.com/releases/7.2.4/couchbase-server-enterprise-7.2.4-linux.x86_64.rpm
+    local greaterThan722
+    greaterThan722=$(__compareVersions "7.2.2" "$version")
+    if [[ "$greaterThan722" -le "0" ]]; then
+        download_url="https://packages.couchbase.com/releases/${version}/couchbase-server-enterprise-${version}-linux.${ARCH}.rpm"
+        file_path="${tmp}/couchbase-server-enterprise-${version}-linux.${ARCH}.rpm"
+    fi 
+    wget -O "$file_path" "$download_url" -q
     __log_debug "Beginning Installation"
-    yum install "${tmp}/couchbase-server-enterprise-${version}-centos${OS_VERSION}.x86_64.rpm" -y -q
+    yum install "$file_path" -y -q
 }
 
 function __install_couchbase_rhel() {
@@ -384,15 +395,23 @@ function __install_couchbase_amazon() {
     local tmp=$2
     __log_info "Installing Couchbase Server v${version}..."
     __log_debug "Downloading installer to: ${tmp}"
+    local ARCH
+    ARCH=$(uname -m)
+    local file_path="${tmp}/couchbase-server-enterprise-${version}-amzn2.${ARCH}.rpm"
     # examples from packages.couchbase.com
     #https://packages.couchbase.com/releases/7.0.0-beta/couchbase-server-enterprise-7.0.0-beta-amzn2.x86_64.rpm
     #https://packages.couchbase.com/releases/6.6.2/couchbase-server-enterprise-6.6.2-amzn2.x86_64.rpm
     #https://packages.couchbase.com/releases/6.6.2/couchbase-server-enterprise-7.1.3-amzn2.aarch64.rpm
-    ARCH=$(uname -m)
-    wget -O "${tmp}/couchbase-server-enterprise-${version}-amzn2.x86_64.rpm" \
-    "https://packages.couchbase.com/releases/${version}/couchbase-server-enterprise-${version}-amzn2.${ARCH}.rpm" -q
+    local download_url="https://packages.couchbase.com/releases/${version}/couchbase-server-enterprise-${version}-amzn2.${ARCH}.rpm"
+    local greaterThan722
+    greaterThan722=$(__compareVersions "7.2.2" "$version")
+    if [[ "$greaterThan722" -le "0" ]]; then
+        download_url="https://packages.couchbase.com/releases/${version}/couchbase-server-enterprise-${version}-linux.${ARCH}.rpm"
+        file_path="${tmp}/couchbase-server-enterprise-${version}-linux.${ARCH}.rpm"
+    fi
+    wget -O "$file_path" "$download_url" -q
     __log_debug "Beginning Installation"
-    yum install "${tmp}/couchbase-server-enterprise-${version}-amzn2.x86_64.rpm" -y -q
+    yum install "$file_path" -y -q
 }
 
 function __install_couchbase_ubuntu() {
@@ -400,10 +419,31 @@ function __install_couchbase_ubuntu() {
     local tmp=$2
     __log_info "Installing Couchbase Server v${version}..."
     __log_debug "Downloading installer to: ${tmp}"
-    wget -O "${tmp}/couchbase-server-enterprise_${version}-ubuntu${OS_VERSION}_amd64.deb" "http://packages.couchbase.com/releases/${version}/couchbase-server-enterprise_${version}-ubuntu${OS_VERSION}_amd64.deb" -q
+    local ARCH
+    ARCH=$(uname -m)
+    local download_url="http://packages.couchbase.com/releases/${version}/couchbase-server-enterprise_${version}-ubuntu${OS_VERSION}_amd64.deb"
+    local file_path="${tmp}/couchbase-server-enterprise_${version}-ubuntu${OS_VERSION}_amd64.deb"
+    # Post 7.2.2
+    #https://packages.couchbase.com/releases/7.2.2/couchbase-server-enterprise_7.2.2-linux_amd64.deb
+    #https://packages.couchbase.com/releases/7.2.2/couchbase-server-enterprise_7.2.2-linux_arm64.deb
+    if [[ "$ARCH" == "aarch64" ]]; then
+        ARCH=arm64
+    fi
+    if [[ "$ARCH" == "x86_64" ]]; then
+        ARCH=amd64
+    fi
+    local greaterThan722
+    greaterThan722=$(__compareVersions "7.2.2" "$version")
+    if [[ "$greaterThan722" -le "0" ]]; then
+        download_url="https://packages.couchbase.com/releases/${version}/couchbase-server-enterprise_${version}-linux_${ARCH}.deb"
+        file_path="${tmp}/couchbase-server-enterprise-${version}-linux_${ARCH}.deb"
+    fi
+    __log_debug "Download link: $download_url"
+    __log_debug "Download Path: $file_path"
+    wget -O "$file_path" "$download_url" -q
     __log_debug "Download Complete.  Beginning Unpacking"
-    until dpkg -i "${tmp}/couchbase-server-enterprise_${version}-ubuntu${OS_VERSION}_amd64.deb" > /dev/null; do
-        __log_error "Error while installing ${tmp}/couchbase-server-enterprise_${version}-ubuntu${OS_VERSION}_amd64.deb"
+    until dpkg -i "$file_path" > /dev/null; do
+        __log_error "Error while installing $file_path"
         sleep 1
     done
     __log_debug "Unpacking complete.  Beginning Installation"
@@ -412,7 +452,7 @@ function __install_couchbase_ubuntu() {
         sleep 1
     done
     until apt-get -y install couchbase-server -qq > /dev/null; do
-        __log_error "Error while installing ${tmp}/couchbase-server-enterprise_${version}-ubuntu${OS_VERSION}_amd64.deb"
+        __log_error "Error while installing $file_path"
         sleep 1
     done
 }
@@ -422,10 +462,31 @@ function __install_couchbase_debian() {
     local tmp=$2
     __log_info "Installing Couchbase Server v${version}..."
     __log_debug "Downloading installer to: ${tmp}"
-    wget -O "${tmp}/couchbase-server-enterprise_${version}-debian${OS_VERSION}_amd64.deb" "http://packages.couchbase.com/releases/${version}/couchbase-server-enterprise_${version}-debian${OS_VERSION}_amd64.deb" -q
+    local ARCH
+    ARCH=$(uname -m)
+    local download_url="http://packages.couchbase.com/releases/${version}/couchbase-server-enterprise_${version}-debian${OS_VERSION}_amd64.deb"
+    local file_path="${tmp}/couchbase-server-enterprise_${version}-debian${OS_VERSION}_amd64.deb"
+    # Post 7.2.2
+    #https://packages.couchbase.com/releases/7.2.2/couchbase-server-enterprise_7.2.2-linux_amd64.deb
+    #https://packages.couchbase.com/releases/7.2.2/couchbase-server-enterprise_7.2.2-linux_arm64.deb
+    #https://packages.couchbase.com/releases/7.2.4/couchbase-server-enterprise_7.2.4-linux_arm64.deb
+    if [[ "$ARCH" == "aarch64" ]]; then
+        ARCH=arm64
+    fi
+    if [[ "$ARCH" == "x86_64" ]]; then
+        ARCH=amd64
+    fi
+    local greaterThan722
+    greaterThan722=$(__compareVersions "7.2.2" "$version")
+    if [[ "$greaterThan722" -le "0" ]]; then
+        download_url="https://packages.couchbase.com/releases/${version}/couchbase-server-enterprise_${version}-linux_${ARCH}.deb"
+        file_path="${tmp}/couchbase-server-enterprise-${version}-linux_${ARCH}.deb"
+    fi
+
+    wget -O "$file_path" "$download_url" -q
     __log_debug "Download Complete.  Beginning Unpacking"
-    until dpkg -i "${tmp}/couchbase-server-enterprise_${version}-debian${OS_VERSION}_amd64.deb" > /dev/null; do
-        __log_error "Error while installing ${tmp}/couchbase-server-enterprise_${version}-debian${OS_VERSION}_amd64.deb"
+    until dpkg -i "$file_path" > /dev/null; do
+        __log_error "Error while installing $file_path"
         sleep 1
     done
     __log_debug "Unpacking complete.  Beginning Installation"
@@ -434,7 +495,7 @@ function __install_couchbase_debian() {
         sleep 1
     done
     until apt-get -y install couchbase-server -qq > /dev/null; do
-        __log_error "Error while installing ${tmp}/couchbase-server-enterprise_${version}-debian${OS_VERSION}_amd64.deb"
+        __log_error "Error while installing $file_path"
         sleep 1
     done
 }

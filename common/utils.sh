@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
-export readonly DEFAULT_SERVICES=("data" "index" "analytics" "eventing" "fts" "query")
-export readonly DEFAULT_7_SERVICES=("data" "index" "analytics" "eventing" "fts" "query" "backup")
+readonly DEFAULT_SERVICES=("data" "index" "analytics" "eventing" "fts" "query")
+readonly DEFAULT_7_SERVICES=("data" "index" "analytics" "eventing" "fts" "query" "backup")
+export DEFAULT_SERVICES
+export DEFAULT_7_SERVICES
 #  Generates a 13 character random string
 function __generate_random_string() {
     NEW_UUID=$(LC_ALL=C tr -dc A-Za-z0-9 </dev/urandom | head -c 13 ; echo '')

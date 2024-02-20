@@ -6,7 +6,7 @@ These scripts are intended for usage to install and cluster multiple VM's, conta
 
 These scripts are bundled into a single output file with [bash_bunder](https://github.com/malscent/bash_bundler).  It can be installed with 
 ```
-go get github.com/malscent/bash_bundler
+go install github.com/malscent/bash_bundler@latest
 ```
 
 Bundling:

@@ -77,9 +77,13 @@ function __amazon_prerequisites() {
     OS_VERSION=$(awk '/^VERSION_ID=/{print $1}' /etc/os-release | awk -F"=" '{print $2}' | sed -e 's/^"//' -e 's/"$//')
     if [[ "$OS_VERSION" == "2" ]]; then
         amazon-linux-extras install epel
+        yum install jq net-tools python2 python-pip wget -q -y
+        python2 -m pip -q install httplib2
+    else
+        yum install jq net-tools python-pip wget -q -y
+        python3 -m pip -q install httplib2
     fi
-    yum install jq net-tools python2 python-pip wget -q -y
-    python2 -m pip -q install httplib2
+
 }
 
 function __install_prerequisites() {

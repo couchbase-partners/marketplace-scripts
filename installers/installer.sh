@@ -48,7 +48,7 @@ function __ubuntu_prerequisites() {
     # shellcheck disable=SC2034
     DEBIAN_FRONTEND=noninteractive
     __log_debug "Installing Prequisites"
-    until apt-get install --assume-yes apt-utils dialog python-httplib2 jq net-tools wget lsb-release  -qq > /dev/null; do
+    until apt-get install --assume-yes apt-utils dialog jq net-tools wget lsb-release  -qq > /dev/null; do
         __log_error "Error during pre-requisite installation"
         sleep 2
     done

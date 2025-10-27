@@ -296,7 +296,7 @@ LOCAL_IP=$(ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([
 HOST=$(hostname) || hostnamectl
 # Do a reverse DNS lookup on the cluster host and see if it is this local ip
 PUBLIC_HOST_DNS=$(dig +short "$CLUSTER_HOST")
-PUBLIC_IP=$(wget -nv --quiet -O - ifconfig.me)
+PUBLIC_IP=$(wget -nv --quiet -O - ifconfig.me/ip)
 __log_debug "Hostname:  ${HOST}"
 __log_debug "Local IP: ${LOCAL_IP}"
 __log_debug "ReverseDNS: ${PUBLIC_HOST_DNS}"
